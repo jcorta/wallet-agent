@@ -53,6 +53,25 @@ services:
       idp:
         condition: service_healthy
 
+  agent-service:
+    build: ./agent-service
+    environment:
+      LLM_PROVIDER: ${LLM_PROVIDER}
+      LLM_MODEL: ${LLM_MODEL}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      WALLET_API_URL: http://wallet-api:8000
+      JWKS_URL: http://idp:8000/.well-known/jwks.json
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+    ports:
+      - "8003:8000"
+    depends_on:
+      wallet-api:
+        condition: service_healthy
+      idp:
+        condition: service_healthy
+
 volumes:
   pgdata:
   idp-keys:

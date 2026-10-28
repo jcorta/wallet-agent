@@ -47,17 +47,17 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 3 — agent-service (minimal)
 
-- [ ] Project setup; check current LangChain/LangGraph docs; pin versions
-- [ ] Settings including `LLM_PROVIDER`, `LLM_MODEL`
-- [ ] Chat model built only through `init_chat_model`
-- [ ] Wallet client (httpx, timeouts, request-id propagation, token forwarded from config)
-- [ ] `get_balance` tool reading the token from `RunnableConfig`
-- [ ] Graph: `agent` ↔ `read_tools`, Spanish system prompt
-- [ ] Console client in `scripts/` (login, chat loop)
-- [ ] Tests with a fake chat model: tool routing, token not present in messages or state
-- [ ] Dockerfile and compose entry
-- [ ] Verify with the configured model through the console client
-- [ ] Commit: `feat(agent): add minimal agent with balance tool`
+- [x] Project setup; check current LangChain/LangGraph docs; pin versions
+- [x] Settings including `LLM_PROVIDER`, `LLM_MODEL`
+- [x] Chat model built only through `init_chat_model`
+- [x] Wallet client (httpx, timeouts, request-id propagation, token forwarded from config)
+- [x] `get_balance` tool reading the token from `RunnableConfig`
+- [x] Graph: `agent` ↔ `read_tools`, Spanish system prompt
+- [x] Console client in `scripts/` (login, chat loop)
+- [x] Tests with a fake chat model: tool routing, token not present in messages or state
+- [x] Dockerfile and compose entry
+- [x] Verify with the configured model through the console client
+- [x] Commit: `feat(agent): add minimal agent with balance tool`
 
 ## Stage 4 — Transfers, confirmation, ownership
 
@@ -118,3 +118,6 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 - **`transfers` has an extra `contact_id` column** so idempotent replays can compare the original request, and so rejected attempts for unknown contacts are still auditable.
 - **Wallet-api tests need Postgres** (row locks and concurrency are part of what is tested). They read `TEST_DATABASE_URL`; each run uses a throwaway schema. Compose publishes Postgres on `127.0.0.1:5433` for this purpose.
 - **Seed data:** besides the two users, three external accounts exist as transfer destinations (`external:*` user ids). Alice has two contacts named Juan to exercise ambiguity.
+- **Default model is `gemini-3.5-flash`**: `gemini-2.5-flash` is no longer available to new free-tier keys.
+- **Stage 3 exposes a minimal `/chat`** (in-memory checkpointer, no thread ownership) so the console client has something to talk to; persistence and ownership arrive in stage 4.
+- **The user token is passed as `SecretStr` in `configurable`.** LangGraph copies every plain string in `configurable` into persisted checkpoint metadata, which would have stored the token in Postgres; a test asserts it does not appear in checkpoints.
