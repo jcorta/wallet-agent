@@ -61,19 +61,19 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 4 — Transfers, confirmation, ownership
 
-- [ ] `get_transactions`, `list_contacts` tools
-- [ ] `request_transfer` tool (no execution), Pydantic-validated arguments
-- [ ] `AgentState` with `pending_transfer` and `approved`
-- [ ] Nodes `prepare_transfer`, `confirm`, `execute_transfer`, `cancel_transfer`
-- [ ] Routing function; every tool call answered exactly once
-- [ ] Idempotency key generated in `prepare_transfer`
-- [ ] Postgres checkpointer in schema `agent` (verify `search_path` behavior)
-- [ ] `agent.threads` ownership table
-- [ ] `POST /chat` and `POST /chat/{thread_id}/confirm` with JWT validation, ownership check, `409` cases
-- [ ] Console client: y/n confirmation
-- [ ] Tests (fake model, stubbed wallet-api): no execution without approval, decline path, wallet rejection surfaced, ambiguous/unknown contact, foreign thread returns 404, confirm without pending interrupt returns 409, resume after checkpointer reload
-- [ ] Verify: restart `agent-service` mid-confirmation, then confirm
-- [ ] Commit: `feat(agent): add transfer flow with human approval`
+- [x] `get_transactions`, `list_contacts` tools
+- [x] `request_transfer` tool (no execution), Pydantic-validated arguments
+- [x] `AgentState` with `pending_transfer` and `approved`
+- [x] Nodes `prepare_transfer`, `confirm`, `execute_transfer`, `cancel_transfer`
+- [x] Routing function; every tool call answered exactly once
+- [x] Idempotency key generated in `prepare_transfer`
+- [x] Postgres checkpointer in schema `agent` (verify `search_path` behavior)
+- [x] `agent.threads` ownership table
+- [x] `POST /chat` and `POST /chat/{thread_id}/confirm` with JWT validation, ownership check, `409` cases
+- [x] Console client: y/n confirmation
+- [x] Tests (fake model, stubbed wallet-api): no execution without approval, decline path, wallet rejection surfaced, ambiguous/unknown contact, foreign thread returns 404, confirm without pending interrupt returns 409, resume after checkpointer reload
+- [x] Verify: restart `agent-service` mid-confirmation, then confirm
+- [x] Commit: `feat(agent): add transfer flow with human approval`
 
 ## Stage 5 — Frontend
 
@@ -121,3 +121,6 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 - **Default model is `gemini-3.5-flash`**: `gemini-2.5-flash` is no longer available to new free-tier keys.
 - **Stage 3 exposes a minimal `/chat`** (in-memory checkpointer, no thread ownership) so the console client has something to talk to; persistence and ownership arrive in stage 4.
 - **The user token is passed as `SecretStr` in `configurable`.** LangGraph copies every plain string in `configurable` into persisted checkpoint metadata, which would have stored the token in Postgres; a test asserts it does not appear in checkpoints.
+- **Mixed tool calls:** when one model turn contains `request_transfer` together with other tool calls, the transfer branch runs alone and the other calls are answered with "not executed" so each call gets exactly one result.
+- **Thread ids are server-generated.** A client-supplied `thread_id` that does not exist is `404`, identical to a foreign one, so ids cannot be probed or pre-claimed.
+- **Agent tests that touch Postgres** (restart persistence) are skipped unless `TEST_DATABASE_URL` is set; CI sets it. On Windows the suite switches to the selector event loop because psycopg's async driver cannot use the default one.

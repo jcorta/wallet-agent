@@ -1,9 +1,11 @@
 import json
+from decimal import Decimal
 from typing import Any
 
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool, tool
 
+from agent_service.transfers import TransferArgs
 from agent_service.wallet_client import WalletClient
 
 
@@ -30,4 +32,23 @@ def build_read_tools(wallet: WalletClient) -> list[BaseTool]:
         that limit they have already used today."""
         return await _fetch(config, "/accounts/me/balance")
 
-    return [get_balance]
+    @tool
+    async def get_transactions(config: RunnableConfig, limit: int = 10) -> str:
+        """List the user's most recent transfers, newest first, both sent and received,
+        including rejected attempts. `limit` is the number of items (1 to 50)."""
+        return await _fetch(config, "/accounts/me/transactions", limit=max(1, min(limit, 50)))
+
+    @tool
+    async def list_contacts(config: RunnableConfig) -> str:
+        """List the contacts the user can transfer money to."""
+        return await _fetch(config, "/accounts/me/contacts")
+
+    return [get_balance, get_transactions, list_contacts]
+
+
+@tool(args_schema=TransferArgs)
+def request_transfer(contact: str, amount: Decimal) -> str:
+    """Start a money transfer to one of the user's contacts. This does not move any money:
+    the user is asked to confirm first, and the tool result tells you whether it was
+    completed, rejected or cancelled."""
+    raise RuntimeError("request_transfer is handled by the approval flow, never executed directly")

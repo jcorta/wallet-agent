@@ -60,6 +60,7 @@ services:
       LLM_MODEL: ${LLM_MODEL}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      DATABASE_URL: postgresql://agent_svc:${AGENT_DB_PASSWORD}@postgres:5432/${POSTGRES_DB}
       WALLET_API_URL: http://wallet-api:8000
       JWKS_URL: http://idp:8000/.well-known/jwks.json
       JWT_ISSUER: ${JWT_ISSUER}
@@ -67,6 +68,8 @@ services:
     ports:
       - "8003:8000"
     depends_on:
+      postgres:
+        condition: service_healthy
       wallet-api:
         condition: service_healthy
       idp:

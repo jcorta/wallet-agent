@@ -44,7 +44,18 @@ def main() -> None:
                 continue
             body = response.json()
             thread_id = body["thread_id"]
-            print(f"agent> {body['reply']}")
+            while body["status"] == "pending_confirmation":
+                print(f"agent> {body['summary']}")
+                answer = input("confirm [y/n]> ").strip().lower()
+                response = client.post(
+                    f"/chat/{thread_id}/confirm", json={"approve": answer in ("y", "s", "si")}
+                )
+                if response.status_code != 200:
+                    print(f"error {response.status_code}: {response.json()['error']['message']}")
+                    break
+                body = response.json()
+            else:
+                print(f"agent> {body['reply']}")
 
 
 if __name__ == "__main__":
