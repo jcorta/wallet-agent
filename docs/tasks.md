@@ -16,17 +16,17 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 1 — idp
 
-- [ ] `pyproject.toml`, pinned dependencies, ruff config
-- [ ] Settings via `pydantic-settings` (issuer, audience, users, key path)
-- [ ] RSA key generation on first start, persisted to the configured path
-- [ ] `POST /login` returning RS256 JWT (`sub`, `iss`, `aud`, `exp` = 15 min)
-- [ ] `GET /.well-known/jwks.json`
-- [ ] `GET /health`
-- [ ] Request-id middleware, JSON logging, uniform error body
-- [ ] Tests: valid login, wrong password, token verifies against JWKS, expiry claim
-- [ ] Dockerfile (slim, non-root, healthcheck); compose entry
-- [ ] Verify with real requests against the container
-- [ ] Commit: `feat(idp): add login endpoint and JWKS`
+- [x] `pyproject.toml`, pinned dependencies, ruff config
+- [x] Settings via `pydantic-settings` (issuer, audience, users, key path)
+- [x] RSA key generation on first start, persisted to the configured path
+- [x] `POST /login` returning RS256 JWT (`sub`, `iss`, `aud`, `exp` = 15 min)
+- [x] `GET /.well-known/jwks.json`
+- [x] `GET /health`
+- [x] Request-id middleware, JSON logging, uniform error body
+- [x] Tests: valid login, wrong password, token verifies against JWKS, expiry claim
+- [x] Dockerfile (slim, non-root, healthcheck); compose entry
+- [x] Verify with real requests against the container
+- [x] Commit: `feat(idp): add login endpoint and JWKS`
 
 ## Stage 2 — wallet-api
 

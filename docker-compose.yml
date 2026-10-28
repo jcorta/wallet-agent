@@ -18,5 +18,22 @@ services:
       timeout: 3s
       retries: 10
 
+  idp:
+    build: ./idp
+    environment:
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      USER1_USERNAME: ${USER1_USERNAME}
+      USER1_PASSWORD: ${USER1_PASSWORD}
+      USER1_ID: ${USER1_ID}
+      USER2_USERNAME: ${USER2_USERNAME}
+      USER2_PASSWORD: ${USER2_PASSWORD}
+      USER2_ID: ${USER2_ID}
+    ports:
+      - "8001:8000"
+    volumes:
+      - idp-keys:/data
+
 volumes:
   pgdata:
+  idp-keys:
