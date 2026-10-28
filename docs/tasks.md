@@ -77,11 +77,11 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 5 — Frontend
 
-- [ ] Streamlit app: login, chat, Confirm/Cancel on `pending_confirmation`, logout
-- [ ] Handle `401` by returning to login
-- [ ] Dockerfile and compose entry
-- [ ] Verify the full flow in a browser
-- [ ] Commit: `feat(frontend): add Streamlit chat client`
+- [x] Streamlit app: login, chat, Confirm/Cancel on `pending_confirmation`, logout
+- [x] Handle `401` by returning to login
+- [x] Dockerfile and compose entry
+- [x] Verify the full flow in a browser
+- [x] Commit: `feat(frontend): add Streamlit chat client`
 
 ## Stage 6 — Observability and evals
 

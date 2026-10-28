@@ -75,6 +75,19 @@ services:
       idp:
         condition: service_healthy
 
+  frontend:
+    build: ./frontend
+    environment:
+      IDP_URL: http://idp:8000
+      AGENT_URL: http://agent-service:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      idp:
+        condition: service_healthy
+      agent-service:
+        condition: service_healthy
+
 volumes:
   pgdata:
   idp-keys:
