@@ -9,6 +9,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       WALLET_DB_PASSWORD: ${WALLET_DB_PASSWORD}
       AGENT_DB_PASSWORD: ${AGENT_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
@@ -33,6 +35,23 @@ services:
       - "8001:8000"
     volumes:
       - idp-keys:/data
+
+  wallet-api:
+    build: ./wallet-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://wallet_svc:${WALLET_DB_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWKS_URL: http://idp:8000/.well-known/jwks.json
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      USER1_ID: ${USER1_ID}
+      USER2_ID: ${USER2_ID}
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      idp:
+        condition: service_healthy
 
 volumes:
   pgdata:

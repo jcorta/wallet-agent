@@ -30,20 +30,20 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 2 — wallet-api
 
-- [ ] Project setup, settings, logging, error handling, request-id middleware
-- [ ] JWT validation dependency (JWKS fetch + cache, refetch on unknown `kid`, `iss`/`aud`/`exp` checks)
-- [ ] SQLAlchemy models and table creation for `accounts`, `contacts`, `transfers`
-- [ ] Idempotent seed data for both users (ids match idp config)
-- [ ] `GET /accounts/me/balance`
-- [ ] `GET /accounts/me/transactions`
-- [ ] `GET /accounts/me/contacts`
-- [ ] `POST /transfers` with ordered controls, row locks, stable lock order, atomic debit/credit
-- [ ] Rejected attempts recorded with reason; idempotent replay of both outcomes
-- [ ] `GET /health`
-- [ ] Tests: insufficient funds, over daily limit, foreign contact, non-positive amount, idempotent retry, same key different payload (409), token of another user, missing/expired/bad-signature token, concurrent transfers
-- [ ] Dockerfile and compose entry (`depends_on` idp and postgres healthy)
-- [ ] Verify end to end with real tokens from the idp container
-- [ ] Commit: `feat(wallet-api): add account endpoints and controlled transfers`
+- [x] Project setup, settings, logging, error handling, request-id middleware
+- [x] JWT validation dependency (JWKS fetch + cache, refetch on unknown `kid`, `iss`/`aud`/`exp` checks)
+- [x] SQLAlchemy models and table creation for `accounts`, `contacts`, `transfers`
+- [x] Idempotent seed data for both users (ids match idp config)
+- [x] `GET /accounts/me/balance`
+- [x] `GET /accounts/me/transactions`
+- [x] `GET /accounts/me/contacts`
+- [x] `POST /transfers` with ordered controls, row locks, stable lock order, atomic debit/credit
+- [x] Rejected attempts recorded with reason; idempotent replay of both outcomes
+- [x] `GET /health`
+- [x] Tests: insufficient funds, over daily limit, foreign contact, non-positive amount, idempotent retry, same key different payload (409), token of another user, missing/expired/bad-signature token, concurrent transfers
+- [x] Dockerfile and compose entry (`depends_on` idp and postgres healthy)
+- [x] Verify end to end with real tokens from the idp container
+- [x] Commit: `feat(wallet-api): add account endpoints and controlled transfers`
 
 ## Stage 3 — agent-service (minimal)
 
@@ -114,4 +114,7 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Open decisions
 
-Recorded as they arise; none yet.
+- **Self transfers** are rejected with `self_transfer` (not in the original control list).
+- **`transfers` has an extra `contact_id` column** so idempotent replays can compare the original request, and so rejected attempts for unknown contacts are still auditable.
+- **Wallet-api tests need Postgres** (row locks and concurrency are part of what is tested). They read `TEST_DATABASE_URL`; each run uses a throwaway schema. Compose publishes Postgres on `127.0.0.1:5433` for this purpose.
+- **Seed data:** besides the two users, three external accounts exist as transfer destinations (`external:*` user ids). Alice has two contacts named Juan to exercise ambiguity.
