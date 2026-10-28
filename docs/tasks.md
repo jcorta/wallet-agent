@@ -4,15 +4,15 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 0 — Scaffold
 
-- [ ] Directory structure for `idp`, `wallet-api`, `agent-service`, `frontend`
-- [ ] `docker-compose.yml` with `pgvector/pgvector` Postgres, healthcheck, init script creating schemas `wallet` and `agent`
-- [ ] `.env.example` with every variable documented
-- [ ] `.gitignore` covering `.env`, virtualenvs and caches
-- [ ] MIT `LICENSE`
-- [ ] README skeleton (what it is, architecture placeholder, quickstart placeholder)
-- [ ] GitHub Actions workflow skeleton (matrix over services: ruff check, ruff format --check, pytest)
-- [ ] Verify: `docker compose up postgres` becomes healthy; schemas exist
-- [ ] Commit: `chore: scaffold monorepo`
+- [x] Directory structure for `idp`, `wallet-api`, `agent-service`, `frontend`
+- [x] `docker-compose.yml` with `pgvector/pgvector` Postgres, healthcheck, init script creating schemas and a dedicated role per schema
+- [x] `.env.example` with every variable documented
+- [x] `.gitignore` covering `.env`, virtualenvs and caches
+- [x] MIT `LICENSE`
+- [x] README skeleton (what it is, architecture placeholder, quickstart placeholder)
+- [x] GitHub Actions workflow skeleton (matrix over services: ruff check, ruff format --check, pytest)
+- [x] Verify: `docker compose up postgres` becomes healthy; schemas exist
+- [x] Commit: `chore: scaffold monorepo`
 
 ## Stage 1 — idp
 
