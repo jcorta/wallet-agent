@@ -85,14 +85,14 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 6 — Observability and evals
 
-- [ ] LangSmith enabled only through environment variables; verify startup without them
-- [ ] Eval harness: login, reset/inspect wallet state, call the agent, retry with backoff on rate limits
-- [ ] Cases: no transfer without confirmation; balance matches wallet-api; other-user data refused; prompt injection; over-limit rejection reported; unknown contact; ambiguous contact
-- [ ] Additional cases to reach 10–15 (decline path, repeated confirm, non-positive amount, thread of another user)
-- [ ] Assertions against wallet-api state where possible
-- [ ] Document how to run subsets and how to compare providers
-- [ ] Run with Gemini; run with Anthropic if a key is available; record results
-- [ ] Commit: `feat(agent): add tracing and evaluation suite`
+- [x] LangSmith enabled only through environment variables; verify startup without them
+- [x] Eval harness: login, reset/inspect wallet state, call the agent, retry with backoff on rate limits
+- [x] Cases: no transfer without confirmation; balance matches wallet-api; other-user data refused; prompt injection; over-limit rejection reported; unknown contact; ambiguous contact
+- [x] Additional cases to reach 10–15 (decline path, repeated confirm, non-positive amount, thread of another user)
+- [x] Assertions against wallet-api state where possible
+- [x] Document how to run subsets and how to compare providers
+- [x] Run with Gemini (17/17 passing on `gemini-3.1-flash-lite`, including the stage 7 FAQ cases); Anthropic run not possible without a key (see open decisions)
+- [x] Commit: `feat(agent): add tracing and evaluation suite`
 
 ## Stage 7 — Retrieval
 
@@ -124,3 +124,7 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 - **Mixed tool calls:** when one model turn contains `request_transfer` together with other tool calls, the transfer branch runs alone and the other calls are answered with "not executed" so each call gets exactly one result.
 - **Thread ids are server-generated.** A client-supplied `thread_id` that does not exist is `404`, identical to a foreign one, so ids cannot be probed or pre-claimed.
 - **Agent tests that touch Postgres** (restart persistence) are skipped unless `TEST_DATABASE_URL` is set; CI sets it. On Windows the suite switches to the selector event loop because psycopg's async driver cannot use the default one.
+- **Anthropic comparison not run:** no `ANTHROPIC_API_KEY` was available. The suite is provider-neutral; running it with `LLM_PROVIDER=anthropic` is the only step left.
+- **Gemini free-tier quota:** `gemini-3.5-flash` allows 20 requests per day, which a full eval run exceeds, so the default is `gemini-3.1-flash-lite`.
+- **Knowledge documents are in Spanish** because the assistant retrieves and answers in Spanish.
+- **Indexing failures at startup are logged, not fatal**, so the wallet features keep working if the embeddings provider is down.
