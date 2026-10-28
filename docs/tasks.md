@@ -105,12 +105,12 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 8 — Documentation
 
-- [ ] README: overview, Mermaid architecture diagram, design decisions (agent does not touch the database; RS256 + JWKS; token outside LLM context; interrupt in graph, not in prompt; idempotency; production changes)
-- [ ] README: quickstart, tests, evals (manual), switching models, known limitations, next steps
-- [ ] `.env.example` re-checked against code
-- [ ] CI green on a clean clone
-- [ ] Full acceptance run against spec section 8
-- [ ] Commit: `docs: finalize README`
+- [x] README: overview, Mermaid architecture diagram, design decisions (agent does not touch the database; RS256 + JWKS; token outside LLM context; interrupt in graph, not in prompt; idempotency; production changes)
+- [x] README: quickstart, tests, evals (manual), switching models, known limitations, next steps
+- [x] `.env.example` re-checked against code
+- [x] CI green on a clean clone
+- [x] Full acceptance run against spec section 8
+- [x] Commit: `docs: finalize README`
 
 ## Open decisions
 
