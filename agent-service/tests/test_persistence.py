@@ -5,6 +5,7 @@ import httpx
 import psycopg
 import pytest
 from fastapi.testclient import TestClient
+from langchain_core.embeddings.fake import DeterministicFakeEmbedding
 from langchain_core.messages import AIMessage
 
 from agent_service.main import create_app
@@ -31,6 +32,7 @@ def _app(database_url: str, wallet: FakeWallet, script: list[AIMessage]) -> Test
         model=model,
         jwks_fetcher=_jwks,
         wallet_transport=httpx.MockTransport(wallet),
+        embeddings=DeterministicFakeEmbedding(size=8),
     )
     return TestClient(app)
 
@@ -40,8 +42,9 @@ def test_pending_transfer_survives_a_restart_and_keeps_its_owner(wallet: FakeWal
     schema = f"agent_test_{uuid.uuid4().hex[:8]}"
     base = ADMIN_URL.replace("postgresql+psycopg", "postgresql")
     with psycopg.connect(base, autocommit=True) as admin:
+        admin.execute("CREATE EXTENSION IF NOT EXISTS vector")
         admin.execute(f"CREATE SCHEMA {schema}")
-    database_url = f"{base}?options=-csearch_path%3D{schema}"
+    database_url = f"{base}?options=-csearch_path%3D{schema}%2Cpublic"
 
     request = tool_call("request_transfer", {"contact": "María", "amount": 50000})
     try:

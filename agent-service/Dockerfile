@@ -5,11 +5,13 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY src ./src
+COPY knowledge ./knowledge
 RUN uv sync --frozen --no-dev
 
 FROM python:3.12-slim
 RUN useradd --system --uid 10001 --create-home app
 COPY --from=build /app /app
+WORKDIR /app
 ENV PATH=/app/.venv/bin:$PATH PYTHONUNBUFFERED=1
 USER app
 EXPOSE 8000

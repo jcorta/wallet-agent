@@ -5,6 +5,7 @@ from typing import Any
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool, tool
 
+from agent_service.knowledge import KnowledgeSearch
 from agent_service.transfers import TransferArgs
 from agent_service.wallet_client import WalletClient
 
@@ -44,6 +45,19 @@ def build_read_tools(wallet: WalletClient) -> list[BaseTool]:
         return await _fetch(config, "/accounts/me/contacts")
 
     return [get_balance, get_transactions, list_contacts]
+
+
+def build_knowledge_tool(knowledge: KnowledgeSearch) -> BaseTool:
+    @tool
+    async def search_knowledge(query: str) -> str:
+        """Search the wallet's help documents about fees, settlement times and account limits.
+        Use it for general questions about how the wallet works, not for the user's own data."""
+        passages = await knowledge.search(query)
+        return json.dumps(
+            [{"source": p.source, "content": p.content} for p in passages], ensure_ascii=False
+        )
+
+    return search_knowledge
 
 
 @tool(args_schema=TransferArgs)

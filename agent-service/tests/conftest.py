@@ -108,17 +108,16 @@ def settings() -> Settings:
 
 
 @pytest.fixture
-def make_client(
-    settings: Settings, wallet: FakeWallet
-) -> Iterator[Callable[[list[AIMessage]], TestClient]]:
+def make_client(settings: Settings, wallet: FakeWallet) -> Iterator[Callable[..., TestClient]]:
     clients: list[TestClient] = []
 
-    def factory(script: list[AIMessage]) -> TestClient:
+    def factory(script: list[AIMessage], **overrides: Any) -> TestClient:
         app = create_app(
             settings,
             model=ScriptedChatModel(responses=script),
             jwks_fetcher=_jwks,
             wallet_transport=httpx.MockTransport(wallet),
+            **overrides,
         )
         client = TestClient(app)
         client.__enter__()

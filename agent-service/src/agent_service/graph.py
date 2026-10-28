@@ -13,8 +13,14 @@ from langgraph.prebuilt import ToolNode
 from langgraph.types import interrupt
 from pydantic import ValidationError
 
+from agent_service.knowledge import KnowledgeSearch
 from agent_service.prompts import SYSTEM_PROMPT
-from agent_service.tools import build_read_tools, credentials_from, request_transfer
+from agent_service.tools import (
+    build_knowledge_tool,
+    build_read_tools,
+    credentials_from,
+    request_transfer,
+)
 from agent_service.transfers import TransferArgs, format_ars, resolve_contact
 from agent_service.wallet_client import WalletApiError, WalletClient
 
@@ -61,8 +67,11 @@ def build_graph(
     model: BaseChatModel,
     wallet: WalletClient,
     checkpointer: BaseCheckpointSaver,
+    knowledge: KnowledgeSearch | None = None,
 ) -> CompiledStateGraph:
     read_tools = build_read_tools(wallet)
+    if knowledge is not None:
+        read_tools.append(build_knowledge_tool(knowledge))
     llm = model.bind_tools([*read_tools, request_transfer])
 
     async def agent(state: AgentState) -> dict:

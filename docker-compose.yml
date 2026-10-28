@@ -63,6 +63,8 @@ services:
       LANGSMITH_TRACING: ${LANGSMITH_TRACING:-false}
       LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:-}
       LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-wallet-agent}
+      EMBEDDINGS_PROVIDER: ${EMBEDDINGS_PROVIDER:-google_genai}
+      EMBEDDINGS_MODEL: ${EMBEDDINGS_MODEL:-gemini-embedding-001}
       DATABASE_URL: postgresql://agent_svc:${AGENT_DB_PASSWORD}@postgres:5432/${POSTGRES_DB}
       WALLET_API_URL: http://wallet-api:8000
       JWKS_URL: http://idp:8000/.well-known/jwks.json

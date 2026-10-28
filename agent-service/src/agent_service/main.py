@@ -2,10 +2,13 @@ import logging
 import uuid
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 import httpx
 from fastapi import Depends, FastAPI, Request
+from langchain.embeddings import init_embeddings
+from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.base import BaseCheckpointSaver
@@ -20,6 +23,7 @@ from pydantic import BaseModel, Field, SecretStr, StrictBool
 from agent_service.auth import JwksCache, current_user_id, http_jwks_fetcher
 from agent_service.errors import ApiError, ErrorBody, install_error_handlers
 from agent_service.graph import build_graph
+from agent_service.knowledge import KnowledgeBase, KnowledgeSearch, load_chunks
 from agent_service.llm import build_chat_model
 from agent_service.logging import RequestIdMiddleware, configure_logging
 from agent_service.settings import Settings
@@ -58,9 +62,9 @@ class HealthResponse(BaseModel):
 @asynccontextmanager
 async def _persistence(
     settings: Settings,
-) -> AsyncIterator[tuple[BaseCheckpointSaver, ThreadStore]]:
+) -> AsyncIterator[tuple[BaseCheckpointSaver, ThreadStore, AsyncConnectionPool | None]]:
     if settings.database_url is None:
-        yield InMemorySaver(), InMemoryThreadStore()
+        yield InMemorySaver(), InMemoryThreadStore(), None
         return
     pool = AsyncConnectionPool(
         settings.database_url,
@@ -73,9 +77,33 @@ async def _persistence(
         await checkpointer.setup()
         threads = PostgresThreadStore(pool)
         await threads.setup()
-        yield checkpointer, threads
+        yield checkpointer, threads, pool
     finally:
         await pool.close()
+
+
+async def _index_knowledge(
+    settings: Settings, pool: AsyncConnectionPool, embeddings: Embeddings | None
+) -> KnowledgeBase:
+    base = KnowledgeBase(
+        pool,
+        embeddings
+        or init_embeddings(settings.embeddings_model, provider=settings.embeddings_provider),
+        f"{settings.embeddings_provider}:{settings.embeddings_model}",
+    )
+    await base.setup()
+    try:
+        chunks = load_chunks(Path(settings.knowledge_dir))
+        if not chunks:
+            logger.warning(
+                "no knowledge documents found", extra={"fields": {"dir": settings.knowledge_dir}}
+            )
+        await base.sync(chunks)
+        logger.info("knowledge indexed", extra={"fields": {"chunks": len(chunks)}})
+    except Exception:
+        # Answers about the wallet's own data do not depend on the knowledge base.
+        logger.exception("knowledge indexing failed; searching whatever was indexed before")
+    return base
 
 
 def _pending_summary(snapshot: Any) -> str | None:
@@ -88,6 +116,8 @@ def create_app(
     model: BaseChatModel | None = None,
     jwks_fetcher: Callable[[], dict[str, Any]] | None = None,
     wallet_transport: httpx.AsyncBaseTransport | None = None,
+    embeddings: Embeddings | None = None,
+    knowledge: KnowledgeSearch | None = None,
 ) -> FastAPI:
     settings = settings or Settings()  # type: ignore[call-arg]
     configure_logging(settings.log_level)
@@ -97,9 +127,14 @@ def create_app(
         wallet = WalletClient(
             settings.wallet_api_url, settings.http_timeout_seconds, wallet_transport
         )
-        async with _persistence(settings) as (checkpointer, threads):
+        async with _persistence(settings) as (checkpointer, threads, pool):
             app.state.threads = threads
-            app.state.graph = build_graph(model or build_chat_model(settings), wallet, checkpointer)
+            search = knowledge
+            if search is None and pool is not None:
+                search = await _index_knowledge(settings, pool, embeddings)
+            app.state.graph = build_graph(
+                model or build_chat_model(settings), wallet, checkpointer, search
+            )
             yield
         await wallet.aclose()
 

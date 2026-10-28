@@ -96,12 +96,12 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 
 ## Stage 7 — Retrieval
 
-- [ ] 2–3 markdown documents in `agent-service/knowledge/`
-- [ ] Embeddings through `init_embeddings`; pgvector table in schema `agent`
-- [ ] Idempotent indexing at startup
-- [ ] `search_knowledge` tool wired into `read_tools`
-- [ ] 2–3 FAQ eval cases
-- [ ] Commit: `feat(agent): add knowledge retrieval`
+- [x] 2–3 markdown documents in `agent-service/knowledge/`
+- [x] Embeddings through `init_embeddings`; pgvector table in schema `agent`
+- [x] Idempotent indexing at startup
+- [x] `search_knowledge` tool wired into `read_tools`
+- [x] 2–3 FAQ eval cases
+- [x] Commit: `feat(agent): add knowledge retrieval`
 
 ## Stage 8 — Documentation
 
