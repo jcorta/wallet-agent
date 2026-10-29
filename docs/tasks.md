@@ -118,7 +118,7 @@ Checklist derived from [plan.md](plan.md). A stage is done when every item is ch
 - **`transfers` has an extra `contact_id` column** so idempotent replays can compare the original request, and so rejected attempts for unknown contacts are still auditable.
 - **Wallet-api tests need Postgres** (row locks and concurrency are part of what is tested). They read `TEST_DATABASE_URL`; each run uses a throwaway schema. Compose publishes Postgres on `127.0.0.1:5433` for this purpose.
 - **Seed data:** besides the two users, three external accounts exist as transfer destinations (`external:*` user ids). Alice has two contacts named Juan to exercise ambiguity.
-- **Default model is `gemini-3.5-flash`**: `gemini-2.5-flash` is no longer available to new free-tier keys.
+- **`gemini-2.5-flash` is not used**: it is no longer available to new free-tier keys.
 - **Stage 3 exposes a minimal `/chat`** (in-memory checkpointer, no thread ownership) so the console client has something to talk to; persistence and ownership arrive in stage 4.
 - **The user token is passed as `SecretStr` in `configurable`.** LangGraph copies every plain string in `configurable` into persisted checkpoint metadata, which would have stored the token in Postgres; a test asserts it does not appear in checkpoints.
 - **Mixed tool calls:** when one model turn contains `request_transfer` together with other tool calls, the transfer branch runs alone and the other calls are answered with "not executed" so each call gets exactly one result.

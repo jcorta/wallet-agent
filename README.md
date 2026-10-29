@@ -8,6 +8,8 @@ An authenticated user chats with an LLM agent that can read account data, reques
 - The user's identity is never decided or seen by the model. It comes from a verified JWT that travels outside the model's context.
 - Transfers require explicit human approval, enforced by the structure of the graph, not by an instruction to the model.
 
+![Balance query and a transfer that waits for explicit confirmation](docs/assets/transfer-confirmation.gif)
+
 ## Architecture
 
 ```mermaid
@@ -151,6 +153,8 @@ docker compose up -d
 cd agent-service
 uv run --env-file ../.env pytest evals -v
 ```
+
+With `google_genai` / `gemini-3.1-flash-lite` all 17 cases pass.
 
 Calls are spaced (`EVAL_DELAY_SECONDS`, default 3) and retried with backoff to cope with free-tier rate limits. To compare models, run the suite once per `LLM_PROVIDER` / `LLM_MODEL` setting and compare the reports (add `--junitxml=report.xml` to keep them). Use `-k` to run a subset.
 

@@ -32,7 +32,7 @@ services:
       USER2_PASSWORD: ${USER2_PASSWORD}
       USER2_ID: ${USER2_ID}
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
     volumes:
       - idp-keys:/data
 
@@ -46,7 +46,7 @@ services:
       USER1_ID: ${USER1_ID}
       USER2_ID: ${USER2_ID}
     ports:
-      - "8002:8000"
+      - "127.0.0.1:8002:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -71,7 +71,7 @@ services:
       JWT_ISSUER: ${JWT_ISSUER}
       JWT_AUDIENCE: ${JWT_AUDIENCE}
     ports:
-      - "8003:8000"
+      - "127.0.0.1:8003:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,7 +86,7 @@ services:
       IDP_URL: http://idp:8000
       AGENT_URL: http://agent-service:8000
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     depends_on:
       idp:
         condition: service_healthy
