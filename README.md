@@ -1,5 +1,7 @@
 # wallet-agent
 
+[![ci](https://github.com/jcorta/wallet-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jcorta/wallet-agent/actions/workflows/ci.yml)
+
 Reference implementation of a conversational assistant for a digital wallet, in which sensitive actions are gated by code and architecture rather than by prompts.
 
 An authenticated user chats with an LLM agent that can read account data, request transfers and answer questions about fees and limits. The central property: **an agent cannot decide and execute on its own.**
