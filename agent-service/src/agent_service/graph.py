@@ -45,6 +45,13 @@ def _tool_message(call: dict[str, Any], content: str) -> ToolMessage:
     return ToolMessage(content=content, tool_call_id=call["id"], name=call["name"])
 
 
+def _pending(state: AgentState) -> PendingTransfer:
+    pending = state.get("pending_transfer")
+    if pending is None:
+        raise RuntimeError("No pending transfer in state")
+    return pending
+
+
 def route_after_agent(state: AgentState) -> Literal["read_tools", "prepare_transfer", "__end__"]:
     last = state["messages"][-1]
     calls = getattr(last, "tool_calls", None)
@@ -81,7 +88,8 @@ def build_graph(
     async def prepare_transfer(state: AgentState, config: RunnableConfig) -> dict:
         """Validates the request and resolves the contact. Moves no money."""
         last = state["messages"][-1]
-        assert isinstance(last, AIMessage)
+        if not isinstance(last, AIMessage):
+            raise RuntimeError("prepare_transfer must follow a model message")
         call = next(c for c in last.tool_calls if c["name"] == TRANSFER_TOOL)
         # Every tool call needs exactly one answer; anything sharing the turn is not run.
         replies = [
@@ -136,8 +144,7 @@ def build_graph(
 
     def confirm(state: AgentState) -> dict:
         """The approval gate. Nothing above `interrupt` may have side effects."""
-        pending = state["pending_transfer"]
-        assert pending is not None
+        pending = _pending(state)
         decision = interrupt(
             {
                 "kind": "transfer_confirmation",
@@ -149,8 +156,7 @@ def build_graph(
         return {"approved": decision is True}
 
     async def execute_transfer(state: AgentState, config: RunnableConfig) -> dict:
-        pending = state["pending_transfer"]
-        assert pending is not None
+        pending = _pending(state)
         token, request_id = credentials_from(config)
         try:
             transfer = await wallet.post(
@@ -183,8 +189,7 @@ def build_graph(
         }
 
     async def cancel_transfer(state: AgentState) -> dict:
-        pending = state["pending_transfer"]
-        assert pending is not None
+        pending = _pending(state)
         return {
             "messages": [
                 ToolMessage(
